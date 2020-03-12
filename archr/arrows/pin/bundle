@@ -1,0 +1,31 @@
+#!/bin/bash
+
+[ $# -ge 1 ] || { echo "Usage: $0 /path/to/bundle_dir /path/to/arrow_binary"; exit 1; }
+BUNDLE_DIR=$1
+mkdir -p $BUNDLE_DIR
+
+if ! [ -x "$(command -v pin)" ]; then
+	echo "Installing pin..."
+	if [[ "$VIRTUAL_ENV" == "" ]]; then
+		echo "***********************************************************************************************"
+		echo "I cannot install pin system-wide! Please, install it manually or run archr inside a virtualenv."
+		echo "***********************************************************************************************"
+		exit
+	fi
+    mkdir -p $VIRTUAL_ENV/share && cd $VIRTUAL_ENV/share && wget https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.11-97998-g7ecce2dac-gcc-linux.tar.gz -q
+    tar -zxf pin-3.11-97998-g7ecce2dac-gcc-linux.tar.gz && rm -R pin-3.11-97998-g7ecce2dac-gcc-linux.tar.gz && mv pin-3.11-97998-g7ecce2dac-gcc-linux pin
+    ln -sf $VIRTUAL_ENV/share/pin/pin $VIRTUAL_ENV/bin/pin
+fi
+
+PIN_DIR=$(dirname $(readlink -f `which pin`))
+ln -sf $PIN_DIR/* $BUNDLE_DIR
+if [[ ! -d $PIN_DIR/source/tools/bbl_tracer ]]; then
+	echo "Installing bbl_tracer tool..."
+    cd $PIN_DIR/source/tools && mkdir -p bbl_tracer
+    cp -r MyPinTool/makefile* bbl_tracer/ && cp ${0//bundle/bbl_tracer.cpp} bbl_tracer/
+    sed -i 's/MyPinTool/bbl_tracer/g' bbl_tracer/makefile*
+    cd bbl_tracer && PIN_ROOT=$PIN_DIR make all -s && PIN_ROOT=$PIN_DIR make all TARGET=ia32 -s
+fi
+
+FIRE_SCRIPT=${0//bundle/fire}
+cp -L $FIRE_SCRIPT $BUNDLE_DIR/fire

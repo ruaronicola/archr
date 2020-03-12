@@ -77,6 +77,7 @@ from .datascout import DataScoutBow
 from .gdbserver import GDBServerBow
 from .core import CoreBow
 from .ltrace import LTraceBow, LTraceAttachBow
+from .pin import PINTracerBow
 from .strace import STraceBow, STraceAttachBow
 from .input_fd import InputFDBow
 from .rr import RRTracerBow, RRReplayBow
