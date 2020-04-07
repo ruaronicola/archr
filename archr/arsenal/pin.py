@@ -15,7 +15,7 @@ class PINTracerBow(ContextBow):
     REQUIRED_ARROW = "pin"
 
     @contextlib.contextmanager
-    def fire_context(self, args_prefix=None, basic_blocks=True, syscalls=False, main_object_only=False, **kwargs): #pylint:disable=arguments-differ
+    def fire_context(self, args_prefix=None, basic_blocks=True, calls=False, syscalls=False, main_object_only=False, **kwargs): #pylint:disable=arguments-differ
         """
         Starts PIN with a fresh process.
 
@@ -43,6 +43,7 @@ class PINTracerBow(ContextBow):
 
         args_prefix = (args_prefix or []) + [fire_path] + ['-t', bbl_tracer, '-o', outfile]
         args_prefix += ['-b'] if basic_blocks else []
+        args_prefix += ['-c'] if calls else []
         args_prefix += ['-s'] if syscalls else []
         args_prefix += ['-m'] if main_object_only else []
         args_prefix += ['--']
