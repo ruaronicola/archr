@@ -120,7 +120,7 @@ class RRBow(ContextBow):
 
 class RRTracerBow(RRBow):
     @contextlib.contextmanager
-    def fire_context(self, save_core=False, record_magic=False, report_bad_args=False, rr_args=None):
+    def fire_context(self, save_core=False, record_magic=False, report_bad_args=False, rr_args=None, empty_reads=False):
         if save_core or record_magic or report_bad_args:
             raise ArchrError("I can't do any of these things!")
 
@@ -136,6 +136,8 @@ class RRTracerBow(RRBow):
         with self._target_mk_tmpdir() as remote_tmpdir:
             fire_path = os.path.join(self.target.tmpwd, "rr", "fire")
             record_command = [fire_path, 'record', '-n']
+            if empty_reads:
+                record_command += [f'--env=LD_PRELOAD={self.target.tmpwd}/rr/empty_read_{self.target.target_arch}.so']
             if trraces:
                 record_command += trraces.rr_unsupported_cpuid_features.rr_cpuid_filter_cmd_line_args()
             if rr_args:
