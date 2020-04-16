@@ -1,6 +1,7 @@
 import contextlib
 import logging
 import tempfile
+import subprocess
 import os
 
 from . import ContextBow
@@ -48,7 +49,7 @@ class PINTracerBow(ContextBow):
         args_prefix += ['-m'] if main_object_only else []
         args_prefix += ['--']
 
-        with self.target.flight_context(args_prefix=args_prefix, **kwargs) as flight:
+        with self.target.flight_context(args_prefix=args_prefix, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs) as flight:
             yield flight
 
         with open(outfile, 'r') as f:

@@ -78,7 +78,7 @@ class QEMUTracerBow(ContextBow):
             r = QemuTraceResult()
 
             try:
-                with self.target.flight_context(target_cmd, timeout=self.timeout, result=r) as flight:
+                with self.target.flight_context(target_cmd, timeout=self.timeout, result=r, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) as flight:
                     yield flight
             except subprocess.TimeoutExpired:
                 r.timed_out = True
