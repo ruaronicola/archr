@@ -25,13 +25,15 @@ static const string SYSCALLS[] = {"KERNEL::restart_syscall", "KERNEL::exit", "KE
 KNOB<string> KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool",
     "o", "trace.out", "Specify trace filename");
 KNOB<bool> KnobTraceBBL(KNOB_MODE_WRITEONCE, "pintool",
-    "b", "0", "Trace BBL addresses");
+    "bbl", "0", "Trace BBL addresses");
 KNOB<bool> KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool",
-    "c", "0", "Trace Calls");
+    "calls", "0", "Trace Calls");
 KNOB<bool> KnobTraceSyscalls(KNOB_MODE_WRITEONCE, "pintool",
-    "s", "0", "Trace System Calls");
+    "sys", "0", "Trace System Calls");
+KNOB<bool> KnobBranchesOnly(KNOB_MODE_WRITEONCE, "pintool",
+    "branches", "0", "Trace branches only");
 KNOB<bool> KnobMainObjOnly(KNOB_MODE_WRITEONCE, "pintool",
-    "m", "0", "Trace BBL addresses only in the main object");
+    "main", "0", "Trace BBL addresses only in the main object");
 
 INT32 Usage() {
     cerr << "This tool produces a dynamic basic block trace." << endl;
@@ -97,7 +99,7 @@ VOID instrument_trace_bbl(TRACE trace, VOID *vptr) {
 	for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl)) {
     	// bbl tracing
     	ADDRINT addr = BBL_Address(bbl);
-    	if (BBL_HasFallThrough(bbl) && (!KnobMainObjOnly.Value() || (img_low < addr && addr < img_high))) {
+    	if ((!KnobBranchesOnly.Value() || BBL_HasFallThrough(bbl)) && (!KnobMainObjOnly.Value() || (img_low < addr && addr < img_high))) {
 	        BBL_InsertCall(bbl, IPOINT_ANYWHERE, (AFUNPTR) dotrace,
 	                       IARG_ADDRINT, addr, IARG_END);
 	    }
